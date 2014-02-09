@@ -127,9 +127,10 @@ function has_wpls_like_post() {
 			}
 
 			$data = array(
-				'msg_btn'  => __( 'Like [Undo]', 'wp-like-system' ),
-				'msg_like' => $msg_like,
-				'total'    => $meta_count
+				'msg_btn'  	=> __( 'Like [Undo]', 'wp-like-system' ),
+				'msg_like' 	=> $msg_like,
+				'total'    	=> $meta_count,
+				'post_id'	=> $post_ID
 			);
 
 			echo json_encode( $data );
@@ -150,9 +151,10 @@ function has_wpls_like_post() {
 			}
 
 			$data = array(
-				'msg_btn'  => __( 'Like', 'wp-like-system' ),
-				'msg_like' => $msg_like,
-				'total'    => $meta_count
+				'msg_btn'  	=> __( 'Like', 'wp-like-system' ),
+				'msg_like' 	=> $msg_like,
+				'total'    	=> $meta_count,
+				'post_id'	=> $post_ID
 			);
 
 			echo json_encode( $data );
@@ -226,7 +228,7 @@ function has_wpls_show_likes( $post_id ) {
 	$output = '
 		<div class="has_wpls_box">
 			<p class="has_wpls_box__item">
-				<a id="btn-like" class="has_wpls_box__link" data-postid="' . $post_id . '" href="#">
+				<a class="btn-like has_wpls_box__link" data-postid="' . $post_id . '" href="#">
 					<i class="has_wpls_box__icon icon-thumbs-up2"></i>
 					<span class="msg-btn">' . $msg_btn . '<span>
 				</a>
