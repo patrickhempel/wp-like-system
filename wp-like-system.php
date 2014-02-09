@@ -43,7 +43,8 @@ function has_wpls_register_styles_scripts() {
 
 	wp_register_script(
 		'has_wpls_public',
-		plugins_url( 'public/assets/js/public.min.js', __FILE__ )
+		plugins_url( 'public/assets/js/public.js', __FILE__ ),
+		array( 'jquery')
 	);
 }
 
@@ -54,18 +55,22 @@ add_action( 'wp_enqueue_scripts', 'has_wpls_register_styles_scripts' );
 * Enqueue styles and scripts
 */
 function has_wpls_enqueue_style_scripts() {
-	wp_enqueue_style(
-		'has_wpls_public',
-		plugins_url( 'public/assets/css/public.css', __FILE__ )
-	);
+	// wp_enqueue_style(
+	// 	'has_wpls_public',
+	// 	plugins_url( 'public/assets/css/public.css', __FILE__ )
+	// );
 
-	wp_enqueue_script(
-		'has_wpls_public',
-		plugins_url( 'public/assets/js/public.min.js', __FILE__ ),
-		array( 'jquery' ),
-		false,
-		true
-	);
+	// wp_enqueue_script(
+	// 	'has_wpls_public',
+	// 	plugins_url( 'public/assets/js/public.js', __FILE__ ),
+	// 	array( 'jquery' ),
+	// 	false,
+	// 	true
+	// );
+
+	wp_enqueue_style( 'has_wpls_public');
+
+	wp_enqueue_script( 'has_wpls_public');
 
 	wp_localize_script(
 		'has_wpls_public',
