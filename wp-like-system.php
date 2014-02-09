@@ -54,23 +54,12 @@ add_action( 'wp_enqueue_scripts', 'has_wpls_register_styles_scripts' );
 /**
 * Enqueue styles and scripts
 */
-function has_wpls_enqueue_style_scripts() {
-	// wp_enqueue_style(
-	// 	'has_wpls_public',
-	// 	plugins_url( 'public/assets/css/public.css', __FILE__ )
-	// );
-
-	// wp_enqueue_script(
-	// 	'has_wpls_public',
-	// 	plugins_url( 'public/assets/js/public.js', __FILE__ ),
-	// 	array( 'jquery' ),
-	// 	false,
-	// 	true
-	// );
-
+function has_wpls_enqueue_style_scripts() {	
 	wp_enqueue_style( 'has_wpls_public');
 
 	wp_enqueue_script( 'has_wpls_public');
+
+	wp_enqueue_script( 'jquery-cookie');
 
 	wp_localize_script(
 		'has_wpls_public',
@@ -91,27 +80,38 @@ add_action( 'wp_enqueue_scripts', 'has_wpls_enqueue_style_scripts' );
 function has_wpls_like_post() {
 	$nonce  = esc_attr( $_POST['nonce'] );
 
+	session_start();
+
 	if( false == wp_verify_nonce( $nonce, 'wpls-ajax' ) ) {
 		_e( 'You should not be trying to do this.', 'wp-like-system' );
 	}
 
 	if( isset( $_POST['doLike'] ) ) {
 		$user_IP = $_SERVER['REMOTE_ADDR'];
+		$user_session_id = session_id();
 		$post_ID = esc_attr( $_POST['postID'] );
 
-		$meta_IP  = get_post_meta( $post_ID, 'voted_IP' );
-		$voted_IP = $meta_IP[0];
+		// $meta_IP  = get_post_meta( $post_ID, 'voted_IP' );
+		$meta_sessions = get_post_meta( $post_ID, 'voted_Sessions');
+		// $voted_IP = $meta_IP[0];
+		$voted_sessions = $meta_sessions[0];
 
-		if( false == is_array( $voted_IP ) ) {
-			$voted_IP = array();
+		// if( false == is_array( $voted_IP ) ) {
+		// 	$voted_IP = array();
+		// }
+
+		if( false == is_array( $voted_sessions)) {
+			$voted_sessions = array();
 		}
 
 		$meta_count = get_post_meta( $post_ID, 'votes_count', true );
 
 		if( false == alreadyVoted( $post_ID ) ) { // first vote
 			$voted_IP[$user_IP] = time();
+			$voted_sessions[$user_session_id] = time();
 
-			update_post_meta( $post_ID, 'voted_IP', $voted_IP );
+			// update_post_meta( $post_ID, 'voted_IP', $voted_IP );
+			update_post_meta( $post_ID, 'voted_Sessions', $voted_sessions);
 			update_post_meta( $post_ID, 'votes_count', ++$meta_count );
 
 			if( $meta_count >= 3 ) {
@@ -135,7 +135,11 @@ function has_wpls_like_post() {
 
 			echo json_encode( $data );
 		} else { // already voted
-			delete_post_meta( $post_ID, 'voted_IP', $voted_IP );
+			// delete_post_meta( $post_ID, 'voted_IP', $voted_IP );
+			// delete_post_meta( $post_ID, 'voted_Sessions', $voted_sessions);
+
+			unset($voted_sessions[ $user_session_id]);
+			update_post_meta( $post_ID, 'voted_Sessions', $voted_sessions);
 			update_post_meta( $post_ID, 'votes_count', --$meta_count );
 
 			if( $meta_count >= 2 ) {
@@ -172,16 +176,19 @@ add_action( 'wp_ajax_like-post', 'has_wpls_like_post' );
  * Check if user already voted
  */
 function alreadyVoted( $post_id ) {
-	$meta_IP  = get_post_meta( $post_id, 'voted_IP' );
-	$voted_IP = $meta_IP[0];
+	// $meta_IP  = get_post_meta( $post_id, 'voted_IP' );
+	// $voted_IP = $meta_IP[0];
+	$meta_sessions = get_post_meta( $post_id, 'voted_Sessions');
+	$voted_Sessions = $meta_sessions[0];
 
-	if( false == is_array( $voted_IP ) ) {
-		$voted_IP = array();
+	if( false == is_array( $voted_Sessions ) ) {
+		$voted_Sessions = array();
 	}
 
-	$user_ip = $_SERVER['REMOTE_ADDR'];
+	// $user_ip = $_SERVER['REMOTE_ADDR'];
+	$user_session_id = session_id();
 
-	if( in_array( $user_ip, array_keys( $voted_IP ) ) ) { // already voted
+	if( in_array( $user_session_id, array_keys( $voted_Sessions ) ) ) { // already voted
 		return true;
 	} else {
 		return false;
@@ -194,6 +201,8 @@ function alreadyVoted( $post_id ) {
 */
 function has_wpls_show_likes( $post_id ) {
 	$meta_count = get_post_meta( $post_id, 'votes_count', true );
+
+	session_start();
 
 	if( alreadyVoted( $post_id ) ) {
 		$msg_btn = __( 'Like [Undo]', 'wp-like-system' );
