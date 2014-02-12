@@ -1,7 +1,8 @@
 jQuery(document).ready( function( $) {
 	var $btnLike = $('.btn-like');
 
-		$btnLike.on('click', function(e) {
+		$btnLike.on('click', function(event) {
+			event.preventDefault();
 			var postID = $(event.target).parent('.btn-like').data('postid');
 
 			$.ajax({
@@ -15,13 +16,13 @@ jQuery(document).ready( function( $) {
 					postID: postID
 				}
 			}).done(function(data) {
-				var $msgBtn  = $('.btn-like[data-postid="' + data.post_id+'"] .msg-btn'),
-					$msgLike = $('.msg-like');
+				var $msgBtn  = $('.btn-like[data-postid="' + data.post_id+'"]'),
+					$msgCount = $msgBtn.children('span.count');
 
-				$msgBtn.text(data.msg_btn);
-				$msgLike.text(data.msg_like);
+				// $msgBtn.text(data.msg_btn);
+				// $msgLike.text(data.msg_like);
+				$msgBtn.toggleClass('voted');
+				$msgCount.html( data.total);
 			});
-
-			e.preventDefault();
 		});
 });
